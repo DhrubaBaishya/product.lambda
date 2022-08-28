@@ -1,0 +1,22 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy_lambda:
+    runs-on: product.lambda
+    steps:
+      - uses: actions/checkout@v2
+      - uses: hashicorp/setup-terraform@v2
+      - name: Terraform init
+        id: init
+        run: terraform init
+      - name: Terraform plan
+        id: plan
+        run: terraform plan
+      - name: Terraform apply
+        id: apply
+        run: terraform apply -auto-approve -input=false
