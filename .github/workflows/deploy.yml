@@ -1,0 +1,14 @@
+name: Deploy
+
+on: [workflow_dispatch]
+
+jobs:
+  Deploy:
+    runs-on: product.lambda
+    steps:
+      - name: Download package
+        run: |
+          curl 'https://maven.pkg.github.com/DhrubaBaishya/product.lambda/store.product.lambda/1.0.1/product.lambda-1.0.1.jar' \
+          -H "Authorization: Bearer ${{ secrets.PERSONAL_ACCESS_TOKEN }}" \
+          -L \
+          -O
