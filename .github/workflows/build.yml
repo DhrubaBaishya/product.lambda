@@ -4,6 +4,11 @@ on:
   release:
     types: [created]
   workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publish Artifact"
+        required: true
+        default: "false"
 
 jobs:
   Build_Publish:
@@ -17,13 +22,6 @@ jobs:
           distribution: 'temurin'
           server-id: github
           settings-path: ${{ github.workspace }}
-#      - uses: hashicorp/setup-terraform@v2
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-south-1
       - name: Maven Build
         run: mvn --batch-mode --update-snapshots package
       - name: Extract Maven project version
@@ -31,18 +29,13 @@ jobs:
         id: project
       - name: Show extracted Maven project version
         run: echo ${{ steps.project.outputs.version }}
-      - name: Publish to GitHub Packages Apache Maven
+      - if: github.event.inputs.publish == 'true'
+        name: Publish to GitHub Packages Apache Maven
         run: mvn deploy
         env:
           GITHUB_TOKEN: ${{ github.token }}
     outputs:
       maven_version: ${{ steps.project.outputs.version }}
-#      - name: Deploy Resources with CloudFormation
-#        id: amplify-stack
-#        uses: aws-actions/aws-cloudformation-github-deploy@v1
-#        with:
-#          name: test
-#          template: stack.yml
   Deploy:
     runs-on: product.lambda
     needs: Build_Publish
@@ -70,6 +63,12 @@ jobs:
         run: |
           cp resources/aws/infra/product.lambda.aws/* .
           ls
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
       - uses: hashicorp/setup-terraform@v2
       - name: Terraform init
         id: init
