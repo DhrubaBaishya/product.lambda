@@ -70,12 +70,12 @@ jobs:
 #          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 #          aws-region: ap-south-1
       - uses: hashicorp/setup-terraform@v2
-      - name: Terraform init -backend-config="access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" -backend-config="secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+      - name: Terraform init
         id: init
         run: terraform init
-      - name: Terraform plan -var="maven_project_version=${{ needs.Build_Publish.outputs.maven_version }}" -backend-config="access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" -backend-config="secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+      - name: Terraform plan -var="maven_project_version=${{ needs.Build_Publish.outputs.maven_version }}"
         id: plan
         run: terraform plan
       - name: Terraform apply
         id: apply
-        run: terraform apply -auto-approve -input=false -var="maven_project_version=${{ needs.Build_Publish.outputs.maven_version }}" -backend-config="access_key=${{ secrets.AWS_ACCESS_KEY_ID }}" -backend-config="secret_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+        run: terraform apply -auto-approve -input=false -var="maven_project_version=${{ needs.Build_Publish.outputs.maven_version }}"
